@@ -7,8 +7,6 @@ app.use(cors());
 app.use(express.json());
 
 const users  = [];
-//let tweet = {'username': '', 'avatar': '', 'tweet': ''};
-
 const tweets = [];
 
 app.get('/',(req,res) => {
@@ -22,6 +20,12 @@ app.get('/tweets',(req,res) => {
 app.post('/sign-up',(req,res) => {
   const {username,avatar} = req.body;
   users.push({username,avatar});
+  res.send('OK');
+});
+
+app.post('/tweets',(req,res) => {
+  const {username,tweet} = req.body;
+  tweets.push({username,tweet});
   res.send('OK');
 });
 

@@ -12,33 +12,39 @@ const tweets = [];
 function validatePostSignUp(req,res,next){
   if (!req.body.username) return res.status(400).json({error: "Username é obrigatório"});
   if (!req.body.avatar) return res.status(400).json({error: "Avatar é obrigatório"});
+  if (!validateURL(req.body.avatar)) return res.status(400).json({error: "Avatar inválido"});
   return next();
 }
 
 function validatePostTweet(req,res,next){
-  if (!req.body.username) return res.status(400).json({error: "Username é obrigatório"});
+  if (!req.headers.user) return res.status(400).json({error: "Username é obrigatório"});
   if (!req.body.tweet) return res.status(400).json({error: "Tweet é obrigatório"});
+  if (!users.find(user => user.username === req.headers.user)) return res.status(400).json({error: "Username inválido"});
   return next();
+}
+
+function validateURL(url){
+  if (typeof url !== 'string') return false;
+  return (url.match(/^http[^\?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gmi) !== null);
 }
 
 app.get('/',(req,res) => {
   res.send('Foi :D :D');
-});
+}); 
 
 app.get('/tweets',(req,res) => {
-  const lastTweets = [];
-  let i = 0;
-
-  if (tweets.length > 10) i = tweets.length-10;
-
-  for (i ; i < tweets.length ; i++)  lastTweets.push(tweets[i]);
-  
+  const lastTweets = (tweets.slice()).splice(-2);
   lastTweets.map(tweet => {
     const user = users.find(u => u.username === tweet.username);
     tweet.avatar = user.avatar;
   });
-
   res.send(lastTweets);
+});
+
+app.get('/tweets/:username',(req,res) => {
+  const username = req.params.username;
+  const tweetsToReturn = tweets.filter(tweet => tweet.username === username);
+  res.send(tweetsToReturn);
 });
 
 app.post('/sign-up',validatePostSignUp,(req,res) => {
@@ -48,7 +54,8 @@ app.post('/sign-up',validatePostSignUp,(req,res) => {
 });
 
 app.post('/tweets',validatePostTweet,(req,res) => {
-  const {username,tweet} = req.body;
+  const tweet = req.body.tweet ;
+  const username = req.headers.user;
   tweets.push({username,tweet});
   res.status(201).send('OK');
 });

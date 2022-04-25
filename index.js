@@ -37,30 +37,17 @@ app.get('/',(req,res) => {
   res.send('Curioso(a) :D :D');
 }); 
 
-
 app.get('/tweets',validateGetTweet,(req,res) => {
   const page = req.query.page;
   const limit = 10;//req.query.limit;
 
-  console.log(req.query.limit);
-
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-
+  
   const tweetsToReturn = tweets.slice(startIndex,endIndex);
+  
   res.json(tweetsToReturn);
-
 });
-/*
-app.get('/tweets',(req,res) => {
-  const lastTweets = (tweets.slice()).splice(-10);
-  lastTweets.map(tweet => {
-    const user = users.find(u => u.username === tweet.username);
-    tweet.avatar = user.avatar;
-  });
-  res.send(lastTweets);
-});
-*/
 
 app.get('/tweets/:username',(req,res) => {
   const username = req.params.username;
@@ -80,7 +67,7 @@ app.post('/tweets',validatePostTweet,(req,res) => {
 
   const user = users.find(u => u.username === username);
   
-  tweets.push({
+  tweets.unshift({
     username: username,
     avatar: typeof(user)==='undefined'?null:user.avatar,
     tweet: tweet });
